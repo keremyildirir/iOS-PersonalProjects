@@ -13,7 +13,11 @@ struct ContentView: View {
     @State private var correctAnswer = Int.random(in: 0...2)
     
     @State private var showingScore = false
+    @State private var showingFinalScore = false
     @State private var scoreTitle = ""
+    @State private var score = 0
+    
+    @State private var numberOfQuestions = 8
     
     var body: some View {
         ZStack {
@@ -24,7 +28,7 @@ struct ContentView: View {
                 .ignoresSafeArea()
             VStack{
                 Spacer()
-                Text("Guess the Flag!")
+                Text("Guess the Flag")
                     .font(.largeTitle.weight(.bold))
                     .foregroundStyle(.white)
                 VStack(spacing: 15) {
@@ -60,7 +64,7 @@ struct ContentView: View {
                         .foregroundStyle(.white)
                         .font(.title.bold())
                     
-                    Text("...")
+                    Text("\(score)")
                         .foregroundStyle(.white)
                         .font(.largeTitle.bold())
                 }
@@ -72,22 +76,39 @@ struct ContentView: View {
         .alert(scoreTitle, isPresented: $showingScore) {
             Button("Continue", action: shuffle)
         } message: {
-            Text("Your score is ...")
+            Text("Score: \(score)")
+        }
+        .alert(scoreTitle, isPresented: $showingFinalScore) {
+            Button("Restart", action: shuffle)
+        } message: {
+            Text("Your final score is \(score).")
         }
     }
     
     func flagTapped(_ number: Int){
         if number == correctAnswer{
-            scoreTitle = "Correct"
+            scoreTitle = "Correct!"
+            score += 1
         }
         else{
-            scoreTitle = "False"
+            scoreTitle = "Wrong! That's the flag of \(countries[number])."
         }
         
-        showingScore = true
+        numberOfQuestions -= 1
+        
+        if(numberOfQuestions == 0){
+            showingFinalScore = true
+        }
+        else{
+            showingScore = true
+        }
     }
     
     func shuffle(){
+        if(numberOfQuestions == 0){
+            numberOfQuestions = 8
+            score = 0
+        }
         countries.shuffle()
         correctAnswer = Int.random(in: 0...2)
     }
