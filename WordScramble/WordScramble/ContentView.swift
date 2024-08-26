@@ -17,6 +17,8 @@ struct ContentView: View {
     @State private var errorMessage = ""
     @State private var showingError = false
     
+    @State private var score = 0
+    
     var body: some View {
         NavigationStack {
             List {
@@ -33,12 +35,22 @@ struct ContentView: View {
                         }
                     }
                 }
+                Section {
+                    Text("Your score is: \(score)")
+                }
             }
             .navigationTitle(rootWord)
             .onSubmit(addNewWord)
             .onAppear(perform: startGame)
             .alert(errorTitle, isPresented: $showingError) { } message: {
                 Text(errorMessage)
+            }
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Restart") {
+                        startGame()
+                    }
+                }
             }
         }
     }
@@ -63,9 +75,21 @@ struct ContentView: View {
             return
         }
         
+        guard isLongEnough(word: answer) else {
+            wordError(title: "Word not long enough", message: "You must provide a word with at least 3 letters!")
+            return
+        }
+
+        guard isDifferent(word: answer) else {
+            wordError(title: "Same word provided", message: "You can't just provide the same word!")
+            return
+        }
+        
         withAnimation(){
             usedWords.insert(answer, at: 0)
         }
+        
+        updateScore(word: answer)
         
         newWord = ""
     }
@@ -75,6 +99,8 @@ struct ContentView: View {
             if let startWords = try? String(contentsOf: startWordsURL) {
                 let allWords = startWords.components(separatedBy: "\n")
                 rootWord = allWords.randomElement() ?? "anachronistic"
+                usedWords.removeAll()
+                score = 0
                 return
             }
         }
@@ -113,6 +139,22 @@ struct ContentView: View {
         showingError = true
     }
     
+    func isDifferent(word: String) -> Bool {
+        word != rootWord
+    }
+    
+    func isLongEnough(word: String) -> Bool {
+        word.count >= 3
+    }
+    
+    func updateScore(word: String){
+        // 3 is the least user can do, each remaining letter is 1 point
+        let count = word.count - 3
+        
+        // Default point for a correct word
+        let correct = 10
+        score += (count + correct)
+    }
 }
 
 #Preview {
