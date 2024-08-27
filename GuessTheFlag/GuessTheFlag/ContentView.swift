@@ -19,6 +19,13 @@ struct ContentView: View {
     
     @State private var numberOfQuestions = 8
     
+    // Animation states
+    @State private var selectedFlag: Int? = nil
+    @State private var spinAmount = 0.0
+    @State private var fadeAmount = 1.0
+    @State private var scaleAmount: CGFloat = 1.0
+    private let animationDuration = 0.6
+    
     var body: some View {
         ZStack {
             RadialGradient(stops: [
@@ -49,6 +56,15 @@ struct ContentView: View {
                             Image(countries[number])
                                 .clipShape(.capsule)
                                 .shadow(radius: 7)
+                                .rotation3DEffect(
+                                    .degrees(selectedFlag == number ? spinAmount : 0),
+                                    axis: (x: 0, y: 1, z: 0)
+                                )
+                                .opacity(selectedFlag == nil || selectedFlag == number ? 1 : fadeAmount)
+                                .scaleEffect(selectedFlag == number ? 1 : scaleAmount)
+                                .animation(.easeInOut(duration: animationDuration), value: spinAmount)
+                                .animation(.easeInOut(duration: animationDuration), value: fadeAmount)
+                                .animation(.easeInOut(duration: animationDuration), value: scaleAmount)
                         }
                     }
                 }
@@ -86,25 +102,39 @@ struct ContentView: View {
     }
     
     func flagTapped(_ number: Int){
-        if number == correctAnswer{
-            scoreTitle = "Correct!"
-            score += 1
-        }
-        else{
-            scoreTitle = "Wrong! That's the flag of \(countries[number])."
+        selectedFlag = number
+        
+        //Trigger the animation block
+        withAnimation {
+            spinAmount = 360
+            fadeAmount = 0.25
+            scaleAmount = 0.5
         }
         
-        numberOfQuestions -= 1
-        
-        if(numberOfQuestions == 0){
-            showingFinalScore = true
-        }
-        else{
-            showingScore = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + animationDuration) {
+            if number == correctAnswer{
+                scoreTitle = "Correct!"
+                score += 1
+            }
+            else{
+                scoreTitle = "Wrong! That's the flag of \(countries[number])."
+            }
+            
+            numberOfQuestions -= 1
+            
+            if numberOfQuestions == 0 {
+                showingFinalScore = true
+            } else {
+                showingScore = true
+            }
         }
     }
     
     func shuffle(){
+        selectedFlag = nil
+        spinAmount = 0
+        fadeAmount = 1.0
+        scaleAmount = 1.0
         if(numberOfQuestions == 0){
             numberOfQuestions = 8
             score = 0
