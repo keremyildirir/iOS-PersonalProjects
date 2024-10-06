@@ -16,23 +16,25 @@ struct HabitDetailView: View {
             Text(habit.description)
                 .font(.body)
                 .padding()
-            
-            Text("Completion Count: \(habit.completionCount)")
-                .font(.headline)
-                .padding()
-            
-            Button(action: {
-                viewModel.incrementCompletionCount(for: habit)
-            }) {
-                Text("Increment Completion Count")
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
+                        
+            Stepper(value: Binding(
+                get: {
+                    habit.completionCount
+                },
+                set: { newValue in
+                    if newValue >= 0 {
+                        viewModel.incrementCompletionCount(for: habit, by: newValue - habit.completionCount)
+                    }
+                }
+            ), in: 0...100) {
+                Text("Completion Count: \(habit.completionCount)")
             }
+            .padding(.horizontal)
+            
             Spacer()
         }
         .navigationTitle(habit.title)
         .padding()
     }
 }
+

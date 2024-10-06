@@ -8,10 +8,17 @@
 import SwiftUI
 
 struct Habit: Identifiable, Codable {
-    let id = UUID()
+    var id: UUID
     let title: String
     let description: String
-    var completionCount: Int = 0
+    var completionCount: Int
+    
+    init(id: UUID = UUID(), title: String, description: String, completionCount: Int = 0) {
+        self.id = id
+        self.title = title
+        self.description = description
+        self.completionCount = completionCount
+    }
 }
 
 struct ContentView: View {
@@ -32,6 +39,7 @@ struct ContentView: View {
                         }
                     }
                 }
+                .onDelete(perform: viewModel.deleteHabit)
             }
             .navigationTitle("Habit Tracker")
             .toolbar {
