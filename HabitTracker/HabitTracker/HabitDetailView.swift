@@ -12,29 +12,48 @@ struct HabitDetailView: View {
     var habit: Habit
     
     var body: some View {
-        VStack {
+        VStack(spacing: 20) {
+            // Description of the habit
             Text(habit.description)
                 .font(.body)
                 .padding()
-                        
-            Stepper(value: Binding(
-                get: {
-                    habit.completionCount
-                },
-                set: { newValue in
-                    if newValue >= 0 {
-                        viewModel.incrementCompletionCount(for: habit, by: newValue - habit.completionCount)
+                .foregroundColor(.primary)
+                .multilineTextAlignment(.center)
+            
+            // Completion count display with Stepper
+            VStack(spacing: 10) {
+                Text("Completion Count")
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                
+                Stepper(value: Binding(
+                    get: {
+                        habit.completionCount
+                    },
+                    set: { newValue in
+                        if newValue >= 0 {
+                            viewModel.incrementCompletionCount(for: habit, by: newValue - habit.completionCount)
+                        }
                     }
+                ), in: 0...100) {
+                    Text("\(habit.completionCount)")
+                        .font(.title2)
+                        .fontWeight(.bold)
+                        .foregroundColor(.blue)
                 }
-            ), in: 0...100) {
-                Text("Completion Count: \(habit.completionCount)")
+                .padding(.horizontal)
+                .padding(.vertical, 10)
+                .background(RoundedRectangle(cornerRadius: 10)
+                    .stroke(Color.blue, lineWidth: 2))
             }
             .padding(.horizontal)
             
             Spacer()
         }
         .navigationTitle(habit.title)
+        .navigationBarTitleDisplayMode(.inline)
         .padding()
     }
 }
+
 
